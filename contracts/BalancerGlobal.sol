@@ -179,20 +179,24 @@ contract BalancerGlobal {
         return deployedVaults.length;
     }
 
-    address public constant aura = 0xC0c293ce456fF0ED870ADd98a0828Dd4d2903DBF;
-    uint256 public constant category = 1; // 1 for balancer
+    address public constant AURA = 0xC0c293ce456fF0ED870ADd98a0828Dd4d2903DBF;
+    uint256 public constant CATEGORY = 1; // 1 for balancer
 
     // always owned by ychad
     address public owner;
     address internal pendingOwner = 0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52;
 
     function setOwner(address newOwner) external {
-        require(msg.sender == owner);
+        if(msg.sender != owner) {
+            revert();
+        }
         pendingOwner = newOwner;
     }
 
     function acceptOwner() external {
-        require(msg.sender == pendingOwner);
+        if(msg.sender != pendingOwner) {
+            revert();
+        }
         owner = pendingOwner;
     }
 
@@ -200,14 +204,18 @@ contract BalancerGlobal {
         0xf843F61508Fc17543412DE55B10ED87f4C28DE50;
 
     function setAuraPoolManager(address _auraPoolManager) external {
-        require(msg.sender == owner);
+        if(msg.sender != owner) {
+            revert();
+        }
         auraPoolManager = _auraPoolManager;
     }
 
     Registry public registry; //= Registry(address(0x50c1a2eA0a861A967D9d0FFE2AE4012c2E053804));
 
     function setRegistry(address _registry) external {
-        require(msg.sender == owner);
+        if(msg.sender != owner) {
+            revert();
+        }
         registry = Registry(_registry);
     }
 
@@ -215,63 +223,81 @@ contract BalancerGlobal {
         IBooster(0x7818A1DA7BD1E64c199029E86Ba244a9798eEE10);
 
     function setBooster(address _booster) external {
-        require(msg.sender == owner);
+        if(msg.sender != owner) {
+            revert();
+        }
         booster = IBooster(_booster);
     }
 
     address public governance = 0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52;
 
     function setGovernance(address _governance) external {
-        require(msg.sender == owner);
+        if(msg.sender != owner) {
+            revert();
+        }
         governance = _governance;
     }
 
     address public management = 0x16388463d60FFE0661Cf7F1f31a7D658aC790ff7;
 
     function setManagement(address _management) external {
-        require(msg.sender == owner);
+        if(msg.sender != owner) {
+            revert();
+        }
         management = _management;
     }
 
     address public guardian = 0x846e211e8ba920B353FB717631C015cf04061Cc9;
 
     function setGuardian(address _guardian) external {
-        require(msg.sender == owner);
+        if(msg.sender != owner) {
+            revert();
+        }
         guardian = _guardian;
     }
 
     address public treasury = 0x93A62dA5a14C80f265DAbC077fCEE437B1a0Efde;
 
     function setTreasury(address _treasury) external {
-        require(msg.sender == owner);
+        if(msg.sender != owner) {
+            revert();
+        }
         treasury = _treasury;
     }
 
     address public keeper = 0x256e6a486075fbAdbB881516e9b6b507fd082B5D;
 
     function setKeeper(address _keeper) external {
-        require(msg.sender == owner || msg.sender == management);
+        if(!(msg.sender == owner || msg.sender == management)) {
+            revert();
+        }
         keeper = _keeper;
     }
 
     address public healthCheck = 0xDDCea799fF1699e98EDF118e0629A974Df7DF012;
 
     function setHealthcheck(address _health) external {
-        require(msg.sender == owner || msg.sender == management);
+        if(!(msg.sender == owner || msg.sender == management)) {
+            revert();
+        }
         healthCheck = _health;
     }
 
     address public tradeFactory = 0xd6a8ae62f4d593DAf72E2D7c9f7bDB89AB069F06;
 
     function setTradeFactory(address _tradeFactory) external {
-        require(msg.sender == owner);
+        if(msg.sender != owner) {
+            revert();
+        }
         tradeFactory = _tradeFactory;
     }
 
     uint256 public depositLimit = 10_000_000_000_000 * 1e18; // some large number
 
     function setDepositLimit(uint256 _depositLimit) external {
-        require(msg.sender == owner || msg.sender == management);
+        if(!(msg.sender == owner || msg.sender == management)) {
+            revert();
+        }
         depositLimit = _depositLimit;
     }
 
@@ -280,7 +306,9 @@ contract BalancerGlobal {
     function setAuraStratImplementation(address _auraStratImplementation)
         external
     {
-        require(msg.sender == owner);
+        if(msg.sender != owner) {
+            revert();
+        }
         auraStratImplementation = _auraStratImplementation;
     }
 
@@ -289,10 +317,16 @@ contract BalancerGlobal {
 
     // Set the amount of CRV to be locked in Yearn's veCRV voter from each harvest.
     function setKeepCRV(uint256 _keepCRV, address _voterCRV) external {
-        require(msg.sender == owner);
-        require(_keepCRV <= 10_000);
+        if(msg.sender != owner) {
+            revert();
+        }
+        if(_keepCRV > 10_000) {
+            revert();
+        }
         if (_keepCRV > 0) {
-            require(_voterCRV != address(0));
+            if(_voterCRV == address(0)) {
+            revert();
+            }
         }
         keepCRV = _keepCRV;
         voterCRV = _voterCRV;
@@ -303,10 +337,16 @@ contract BalancerGlobal {
 
     // Set the amount of CVX to be locked in Yearn's veCVX voter from each harvest.
     function setKeepCVX(uint256 _keepCVX, address _voterCVX) external {
-        require(msg.sender == owner);
-        require(_keepCVX <= 10_000);
+        if(msg.sender != owner) {
+            revert();
+        }
+        if(_keepCVX > 10_000) {
+            revert();
+        }
         if (_keepCVX > 0) {
-            require(_voterCVX != address(0));
+            if(_voterCVX == address(0)) {
+            revert();
+            }
         }
 
         keepCVX = _keepCVX;
@@ -318,7 +358,9 @@ contract BalancerGlobal {
     function setHarvestProfitMinInUsdt(uint256 _harvestProfitMinInUsdt)
         external
     {
-        require(msg.sender == owner || msg.sender == management);
+        if(!(msg.sender == owner || msg.sender == management)) {
+            revert();
+        }
         harvestProfitMinInUsdt = _harvestProfitMinInUsdt;
     }
 
@@ -327,23 +369,33 @@ contract BalancerGlobal {
     function setHarvestProfitMaxInUsdt(uint256 _harvestProfitMaxInUsdt)
         external
     {
-        require(msg.sender == owner || msg.sender == management);
+        if(!(msg.sender == owner || msg.sender == management)) {
+            revert();
+        }
         harvestProfitMaxInUsdt = _harvestProfitMaxInUsdt;
     }
 
     uint256 public performanceFee = 1_000;
 
     function setPerformanceFee(uint256 _performanceFee) external {
-        require(msg.sender == owner);
-        require(_performanceFee <= 5_000);
+        if(msg.sender != owner) {
+            revert();
+        }
+        if(_performanceFee > 5_000) {
+            revert();
+        }
         performanceFee = _performanceFee;
     }
 
     uint256 public managementFee = 0;
 
     function setManagementFee(uint256 _managementFee) external {
-        require(msg.sender == owner);
-        require(_managementFee <= 1_000);
+        if(msg.sender != owner) {
+            revert();
+        }
+        if(_managementFee > 1_000) {
+            revert();
+        }
         managementFee = _managementFee;
     }
 
@@ -397,7 +449,7 @@ contract BalancerGlobal {
             return pid;
         }
 
-        for (uint256 i = booster.poolLength(); i > 0; i--) {
+        for (uint256 i = booster.poolLength(); i > 0; --i) {
             //we start at the end and work back for most recent
             (, , address gauge, , , ) = booster.poolInfo(i - 1);
 
@@ -412,7 +464,9 @@ contract BalancerGlobal {
         address _gauge,
         bool _allowDuplicate
     ) external returns (address vault, address auraStrategy) {
-        require(msg.sender == owner || msg.sender == management);
+        if(!(msg.sender == owner || msg.sender == management)) {
+            revert();
+        }
 
         return _createNewVaultsAndStrategies(_gauge, _allowDuplicate);
     }
@@ -493,7 +547,7 @@ contract BalancerGlobal {
             harvestProfitMinInUsdt,
             harvestProfitMaxInUsdt,
             address(booster),
-            aura
+            AURA
         );
         IStrategy(strategy).setHealthCheck(healthCheck);
 
@@ -510,6 +564,6 @@ contract BalancerGlobal {
             0
         );
 
-        emit NewAutomatedVault(category, lptoken, _gauge, vault, strategy);
+        emit NewAutomatedVault(CATEGORY, lptoken, _gauge, vault, strategy);
     }
 }

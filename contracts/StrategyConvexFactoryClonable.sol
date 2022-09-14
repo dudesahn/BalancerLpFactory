@@ -194,7 +194,10 @@ contract StrategyConvexFactoryClonable is BaseStrategy {
         address _booster,
         address _convexToken
     ) external returns (address newStrategy) {
-        require(isOriginal);
+        if(!isOriginal) {
+            revert();
+        }
+
         // Copied from https://github.com/optionality/clone-factory/blob/master/contracts/CloneFactory.sol
         bytes20 addressBytes = bytes20(address(this));
         assembly {
@@ -262,7 +265,10 @@ contract StrategyConvexFactoryClonable is BaseStrategy {
         address _convexToken
     ) internal {
         // make sure that we haven't initialized this before
-        require(address(tradeFactory) == address(0)); // already initialized.
+        if(address(tradeFactory) != address(0)) {
+            revert();  // already initialized.
+        }
+
         depositContract = _booster;
         convexToken = IERC20(_convexToken);
 
@@ -279,7 +285,9 @@ contract StrategyConvexFactoryClonable is BaseStrategy {
         (address lptoken, , , address _rewardsContract, , ) = dp.poolInfo(_pid);
         rewardsContract = IConvexRewards(_rewardsContract);
 
-        require(address(lptoken) == address(want));
+        if(address(lptoken) != address(want)) {
+            revert();
+        }
 
         tradeFactory = _tradeFactory;
 
@@ -306,7 +314,7 @@ contract StrategyConvexFactoryClonable is BaseStrategy {
         tf.enable(address(crv), address(want));
 
         //enable for all rewards tokens too
-        for (uint256 i; i < rewardsTokens.length; i++) {
+        for (uint256 i; i < rewardsTokens.length; ++i) {
             IERC20(rewardsTokens[i]).approve(
                 _tradeFactory,
                 type(uint256).max
@@ -329,7 +337,8 @@ contract StrategyConvexFactoryClonable is BaseStrategy {
             uint256 _debtPayment
         )
     {
-        // this claims our CRV, CVX, and any extra tokens like SNX or ANKR. no harm leaving this true even if no extra rewards currently.
+        // this claims our CRV, CVX, and any extra tokens like SNX or ANKR. no harm leaving this true even if no extra rewards currently
+        // rewards will be converted later with mev protection by yswaps (tradeFactory)
         rewardsContract.getReward(address(this), true);
 
         if (localKeepCRV > 0 && curveVoter != address(0)) {
@@ -382,23 +391,24 @@ contract StrategyConvexFactoryClonable is BaseStrategy {
         forceHarvestTriggerOnce = false;
     }
 
-    // migrate our want token to a new strategy if needed, make sure to check claimRewards first
+    // migrate our want token to a new strategy if needed
     // also send over any CRV or CVX that is claimed; for migrations we definitely want to claim
     function prepareMigration(address _newStrategy) internal override {
         uint256 stakedBal = stakedBalance();
         
         if (stakedBal > 0) {
-            rewardsContract.withdrawAndUnwrap(stakedBal, claimRewards);
+            // claimRewards is set to "true"
+            rewardsContract.withdrawAndUnwrap(stakedBal, true);
         }
 
         uint256 crvBal = crv.balanceOf(address(this));
         uint256 cvxBal = convexToken.balanceOf(address(this));
 
         if (crvBal > 0){
-            crv.transfer(_newStrategy, crvBal);
+            crv.safeTransfer(_newStrategy, crvBal);
         }
         if (cvxBal > 0){
-            convexToken.transfer(_newStrategy, cvxBal);
+            convexToken.safeTransfer(_newStrategy, cvxBal);
         }
     }
 
@@ -500,7 +510,7 @@ contract StrategyConvexFactoryClonable is BaseStrategy {
         delete rewardsTokens; //empty the rewardsTokens and rebuild
 
         uint256 length = rewardsContract.extraRewardsLength();
-        for (uint256 i; i < length; i++) {
+        for (uint256 i; i < length; ++i) {
             address virtualRewardsPool = rewardsContract.extraRewards(i);
             address _rewardsToken =
                 IConvexRewards(virtualRewardsPool).rewardToken();
@@ -516,11 +526,11 @@ contract StrategyConvexFactoryClonable is BaseStrategy {
         external
         onlyGovernance
     {
-        require(_keepCrv <= 10_000);
+        if(!(_keepCrv <= 10_000 || _keepCvx <= 10_000)) {
+            revert();
+        }
 
         localKeepCRV = _keepCrv;
-        require(_keepCvx <= 10_000);
-
         localKeepCVX = _keepCvx;
     }
 
@@ -681,7 +691,7 @@ contract StrategyConvexFactoryClonable is BaseStrategy {
         tf.disable(address(crv), address(want));
 
         //disable for all rewards tokens too
-        for (uint256 i; i < rewardsTokens.length; i++) {
+        for (uint256 i; i < rewardsTokens.length; ++i) {
             IERC20(rewardsTokens[i]).approve(_tradeFactory, 0);
             tf.disable(rewardsTokens[i], address(want));
         }

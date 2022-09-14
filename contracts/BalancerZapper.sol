@@ -44,7 +44,7 @@ contract BalancerZapper  {
         owner = msg.sender;
     }
     
-    function joinPool(address _inToken, uint256 _amount, bytes32 _poolId, address _recepient, uint256[] calldata _amountsIn, uint256 _minOut) external{
+    function joinPool(address _inToken, uint256 _amount, bytes32 _poolId, address _recipient, uint256[] calldata _amountsIn, uint256 _minOut) external{
         IERC20(_inToken).transferFrom(msg.sender, address(this), _amount);
         IERC20(_inToken).approve(address(balancerVault), _amount);
 
@@ -55,7 +55,7 @@ contract BalancerZapper  {
         JoinPoolRequest memory jpr = JoinPoolRequest(poolTokens, _amountsIn, userDataEncoded, false);
 
         //must approve this contract as relayer
-        balancerVault.joinPool(_poolId, address(this), _recepient, jpr);
+        balancerVault.joinPool(_poolId, address(this), _recipient, jpr);
     }
 
     function sweep(address token) external{
