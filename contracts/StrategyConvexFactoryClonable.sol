@@ -143,9 +143,6 @@ contract StrategyConvexFactoryClonable is BaseStrategy {
     // convex-specific variables
     bool public claimRewards; // boolean if we should always claim rewards when withdrawing, usually withdrawAndUnwrap (generally this should be false)
 
-    // Curve stuff
-    address public curve; // Curve Pool, this is our pool specific to this vault
-
     bool public checkEarmark; // this determines if we should check if we need to earmark rewards before harvesting
 
     address public tradeFactory;
@@ -273,13 +270,13 @@ contract StrategyConvexFactoryClonable is BaseStrategy {
         convexToken = IERC20(_convexToken);
 
         // want = Curve LP
-        want.approve(address(depositContract), type(uint256).max);
+        want.approve(address(_booster), type(uint256).max);
 
         // harvest profit max set to 25k usdt. will trigger harvest in this situation
         harvestProfitMin = _harvestProfitMin;
         harvestProfitMax = _harvestProfitMax;
 
-        IConvexDeposit dp = IConvexDeposit(depositContract);
+        IConvexDeposit dp = IConvexDeposit(_booster);
         crv = IERC20(dp.crv());
         pid = _pid;
         (address lptoken, , , address _rewardsContract, , ) = dp.poolInfo(_pid);
@@ -308,22 +305,25 @@ contract StrategyConvexFactoryClonable is BaseStrategy {
     function _setUpTradeFactory() internal {
         //approve and set up trade factory
         address _tradeFactory = tradeFactory;
+        IERC20 _want = want;
 
         ITradeFactory tf = ITradeFactory(_tradeFactory);
         crv.approve(_tradeFactory, type(uint256).max);
-        tf.enable(address(crv), address(want));
+        tf.enable(address(crv), address(_want));
 
         //enable for all rewards tokens too
-        for (uint256 i; i < rewardsTokens.length; ++i) {
-            IERC20(rewardsTokens[i]).approve(
+        uint256 rLength = rewardsTokens.length;
+        for (uint256 i; i < rLength; ++i) {
+            address[] memory _rewardsTokens = rewardsTokens;
+            IERC20(_rewardsTokens[i]).approve(
                 _tradeFactory,
                 type(uint256).max
             );
-            tf.enable(rewardsTokens[i], address(want));
+            tf.enable(_rewardsTokens[i], address(_want));
         }
 
         convexToken.approve(_tradeFactory, type(uint256).max);
-        tf.enable(address(convexToken), address(want));
+        tf.enable(address(convexToken), address(_want));
     }
 
     /* ========== FUNCTIONS ========== */
@@ -341,20 +341,25 @@ contract StrategyConvexFactoryClonable is BaseStrategy {
         // rewards will be converted later with mev protection by yswaps (tradeFactory)
         rewardsContract.getReward(address(this), true);
 
-        if (localKeepCRV > 0 && curveVoter != address(0)) {
+        uint256 _localKeepCRV = localKeepCRV;
+        address _curveVoter = curveVoter;
+        if (_localKeepCRV > 0 && _curveVoter != address(0)) {
             uint256 crvBalance = crv.balanceOf(address(this));
             uint256 _sendToVoter =
-                crvBalance.mul(localKeepCRV).div(FEE_DENOMINATOR);
+                crvBalance.mul(_localKeepCRV).div(FEE_DENOMINATOR);
             if (_sendToVoter > 0) {
-                crv.safeTransfer(curveVoter, _sendToVoter);
+                crv.safeTransfer(_curveVoter, _sendToVoter);
             }
         }
-        if (localKeepCVX > 0 && convexVoter != address(0)) {
+
+        uint256 _localKeepCVX = localKeepCVX;
+        address _convexVoter = convexVoter;
+        if (_localKeepCVX > 0 && _convexVoter != address(0)) {
             uint256 cvxBalance = convexToken.balanceOf(address(this));
             uint256 _sendToVoter =
-                cvxBalance.mul(localKeepCVX).div(FEE_DENOMINATOR);
+                cvxBalance.mul(_localKeepCVX).div(FEE_DENOMINATOR);
             if (_sendToVoter > 0) {
-                convexToken.safeTransfer(convexVoter, _sendToVoter);
+                convexToken.safeTransfer(_convexVoter, _sendToVoter);
             }
         }
 
@@ -366,7 +371,7 @@ contract StrategyConvexFactoryClonable is BaseStrategy {
 
         // if assets are greater than debt, things are working great!
         if (assets >= debt) {
-            _profit = assets.sub(debt);
+            _profit = assets - debt;
 
             uint256 toFree = _profit.add(_debtPayment);
 
@@ -384,7 +389,8 @@ contract StrategyConvexFactoryClonable is BaseStrategy {
         }
         // if assets are less than debt, we are in trouble. should never happen. dont worry about withdrawing here just report profit
         else {
-            _loss = debt.sub(assets);
+            _loss = debt - assets;
+            _debtPayment = 0;
         }
 
         // we're done harvesting, so reset our trigger if we used it
@@ -510,13 +516,14 @@ contract StrategyConvexFactoryClonable is BaseStrategy {
         delete rewardsTokens; //empty the rewardsTokens and rebuild
 
         uint256 length = rewardsContract.extraRewardsLength();
+        IERC20 _convexToken = convexToken;
         for (uint256 i; i < length; ++i) {
             address virtualRewardsPool = rewardsContract.extraRewards(i);
             address _rewardsToken =
                 IConvexRewards(virtualRewardsPool).rewardToken();
 
             // we only need to approve the new token and turn on rewards if the extra rewards isn't CVX
-            if (_rewardsToken != address(convexToken)) {
+            if (_rewardsToken != address(_convexToken)) {
                 rewardsTokens.push(_rewardsToken);
             }
         }
@@ -594,13 +601,13 @@ contract StrategyConvexFactoryClonable is BaseStrategy {
             uint256 _stakedBal = stakedBalance();
             if (_stakedBal > 0) {
                 rewardsContract.withdrawAndUnwrap(
-                    Math.min(_stakedBal, _amountNeeded.sub(_wantBal)),
+                    Math.min(_stakedBal, _amountNeeded - _wantBal),
                     claimRewards
                 );
             }
             uint256 _withdrawnBal = balanceOfWant();
             _liquidatedAmount = Math.min(_amountNeeded, _withdrawnBal);
-            _loss = _amountNeeded.sub(_liquidatedAmount);
+            _loss = _amountNeeded - _liquidatedAmount;
         } else {
             // we have enough balance to cover the liquidation available
             return (_amountNeeded, 0);
@@ -687,17 +694,21 @@ contract StrategyConvexFactoryClonable is BaseStrategy {
         }
         ITradeFactory tf = ITradeFactory(_tradeFactory);
 
-        crv.approve(_tradeFactory, 0);
-        tf.disable(address(crv), address(want));
+        IERC20 _crv = crv;
+        IERC20 _want = want;
+        _crv.approve(_tradeFactory, 0);
+        tf.disable(address(_crv), address(_want));
 
         //disable for all rewards tokens too
-        for (uint256 i; i < rewardsTokens.length; ++i) {
-            IERC20(rewardsTokens[i]).approve(_tradeFactory, 0);
-            tf.disable(rewardsTokens[i], address(want));
+        uint256 rLength = rewardsTokens.length;
+        for (uint256 i; i < rLength; ++i) {
+            address[] memory _rewardsTokens = rewardsTokens;
+            IERC20(_rewardsTokens[i]).approve(_tradeFactory, 0);
+            tf.disable(_rewardsTokens[i], address(_want));
         }
 
         convexToken.approve(_tradeFactory, 0);
-        tf.disable(address(convexToken), address(want));
+        tf.disable(address(convexToken), address(_want));
 
         tradeFactory = address(0);
     }

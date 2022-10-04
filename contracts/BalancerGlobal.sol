@@ -210,7 +210,7 @@ contract BalancerGlobal {
         auraPoolManager = _auraPoolManager;
     }
 
-    Registry public registry; //= Registry(address(0x50c1a2eA0a861A967D9d0FFE2AE4012c2E053804));
+    Registry public registry; // = Registry(address(0x50c1a2eA0a861A967D9d0FFE2AE4012c2E053804));
 
     function setRegistry(address _registry) external {
         if(msg.sender != owner) {
@@ -430,13 +430,14 @@ contract BalancerGlobal {
         returns (address)
     {
         address lptoken = ICurveGauge(_gauge).lp_token();
-        if (!registry.isRegistered(lptoken)) {
+        Registry _registry = registry;
+        if (!_registry.isRegistered(lptoken)) {
             return address(0);
         }
 
-        address latest = registry.latestVault(lptoken);
+        address latest = _registry.latestVault(lptoken);
         if (latest == address(0)) {
-            return registry.latestVault(lptoken, VaultType.AUTOMATED);
+            return _registry.latestVault(lptoken, VaultType.AUTOMATED);
         }
 
         return latest;
@@ -445,13 +446,14 @@ contract BalancerGlobal {
     function getPid(address _gauge) public view returns (uint256 pid) {
         pid = type(uint256).max;
 
+        IBooster _booster = booster;
         if (!booster.gaugeMap(_gauge)) {
             return pid;
         }
 
-        for (uint256 i = booster.poolLength(); i > 0; --i) {
+        for (uint256 i = _booster.poolLength(); i > 0; --i) {
             //we start at the end and work back for most recent
-            (, , address gauge, , , ) = booster.poolInfo(i - 1);
+            (, , address gauge, , , ) = _booster.poolInfo(i - 1);
 
             if (_gauge == gauge) {
                 return i - 1;
