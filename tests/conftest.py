@@ -37,7 +37,7 @@ def gauge_controller(interface):
 # put our pool's convex pid here; this is the only thing that should need to change up here **************
 @pytest.fixture(scope="module")
 def pid():
-    pid = 11  # 20wbtc 80 badger
+    pid = 33  # 20wbtc 80 badger (new gauge, old gauge = 11)
     yield pid
 
 
@@ -300,7 +300,7 @@ def vault(
 
 @pytest.fixture(scope="module")
 def badgerweth_gauge(Contract):
-    yield Contract("af50825b010ae4839ac444f6c12d44b96819739b")
+    yield Contract("0x3F29e69955E5202759208DD0C5E0BA55ff934814")
 @pytest.fixture(scope="module")
 def other_gauge(Contract):
     yield Contract("0xcD4722B7c24C29e0413BDCd9e51404B4539D14aE")
@@ -375,6 +375,7 @@ def strategy(
 
     BalancerGlobal = balancer_global
 
+    # this won't work if a pid doesn't exist - or if it can't getPid (like with the old badger gauge)
     pid = BalancerGlobal.getPid(badgerweth_gauge)
     print(pid)
     print(badgerweth_gauge.lp_token())

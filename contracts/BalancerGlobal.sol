@@ -444,11 +444,10 @@ contract BalancerGlobal {
     }
 
     function getPid(address _gauge) public view returns (uint256 pid) {
-        pid = type(uint256).max;
 
         IBooster _booster = booster;
-        if (!booster.gaugeMap(_gauge)) {
-            return pid;
+        if (!_booster.gaugeMap(_gauge)) {
+            return type(uint256).max;
         }
 
         for (uint256 i = _booster.poolLength(); i > 0; --i) {
