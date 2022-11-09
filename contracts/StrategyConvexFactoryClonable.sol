@@ -419,7 +419,7 @@ contract StrategyConvexFactoryClonable is BaseStrategy {
         }
 
         // harvest if we have a profit to claim at our upper limit without considering gas price
-        uint256 claimableProfit = claimableProfitInUsdt();
+        uint256 claimableProfit = claimableProfitInUsdc();
         if (claimableProfit > harvestProfitMax) {
             return true;
         }
@@ -454,8 +454,8 @@ contract StrategyConvexFactoryClonable is BaseStrategy {
         return false;
     }
 
-    /// @notice The value in dollars that our claimable rewards are worth (in USDT, 6 decimals).
-    function claimableProfitInUsdt() public view returns (uint256) {
+    /// @notice The value in dollars that our claimable rewards are worth (in USDC, 6 decimals).
+    function claimableProfitInUsdc() public view returns (uint256) {
         IOracle yearnOracle =
             IOracle(0x83d95e0D5f402511dB06817Aff3f9eA88224B030); // yearn lens oracle
         uint256 crvPrice = yearnOracle.getPriceUsdcRecommended(address(crv));
