@@ -12,6 +12,7 @@ def test_withdraw_after_donation_1(
     strategy,
     chain,
     amount,
+    badgerweth_gauge,
 ):
 
     ## deposit to the vault after approving
@@ -46,6 +47,7 @@ def test_withdraw_after_donation_1(
     # turn off health check since we just took big profit
     strategy.setDoHealthCheck(False, {"from": gov})
     chain.sleep(1)
+    token.transfer(strategy, 5 * 1e18, {"from": badgerweth_gauge})
     strategy.harvest({"from": gov})
     new_params = vault.strategies(strategy).dict()
 
@@ -86,6 +88,7 @@ def test_withdraw_after_donation_2(
     strategy,
     chain,
     amount,
+    badgerweth_gauge,
 ):
 
     ## deposit to the vault after approving
@@ -120,6 +123,7 @@ def test_withdraw_after_donation_2(
     # turn off health check since we just took big profit
     strategy.setDoHealthCheck(False, {"from": gov})
     chain.sleep(1)
+    token.transfer(strategy, 5 * 1e18, {"from": badgerweth_gauge})
     strategy.harvest({"from": gov})
     new_params = vault.strategies(strategy).dict()
 
@@ -157,6 +161,7 @@ def test_withdraw_after_donation_3(
     strategy,
     chain,
     amount,
+    badgerweth_gauge,
 ):
 
     ## deposit to the vault after approving
@@ -191,6 +196,8 @@ def test_withdraw_after_donation_3(
     # turn off health check since we just took big profit
     strategy.setDoHealthCheck(False, {"from": gov})
     chain.sleep(1)
+    token.transfer(strategy, 5 * 1e18, {"from": badgerweth_gauge})
+    strategy.setDoHealthCheck(False, {"from": gov})
     strategy.harvest({"from": gov})
     new_params = vault.strategies(strategy).dict()
 
@@ -228,6 +235,7 @@ def test_withdraw_after_donation_4(
     strategy,
     chain,
     amount,
+    badgerweth_gauge,
 ):
 
     ## deposit to the vault after approving
@@ -262,6 +270,8 @@ def test_withdraw_after_donation_4(
     # turn off health check since we just took big profit
     strategy.setDoHealthCheck(False, {"from": gov})
     chain.sleep(1)
+    token.transfer(strategy, 5 * 1e18, {"from": badgerweth_gauge})
+    strategy.setDoHealthCheck(False, {"from": gov})
     strategy.harvest({"from": gov})
     new_params = vault.strategies(strategy).dict()
 
@@ -306,6 +316,7 @@ def test_withdraw_after_donation_5(
     strategy,
     chain,
     amount,
+    badgerweth_gauge,
 ):
 
     ## deposit to the vault after approving
@@ -331,6 +342,8 @@ def test_withdraw_after_donation_5(
     # turn off health check since we just took big profit
     strategy.setDoHealthCheck(False, {"from": gov})
     chain.sleep(1)
+    token.transfer(strategy, 5 * 1e18, {"from": badgerweth_gauge})
+    strategy.setDoHealthCheck(False, {"from": gov})
     strategy.harvest({"from": gov})
     new_params = vault.strategies(strategy).dict()
 
@@ -368,6 +381,7 @@ def test_withdraw_after_donation_6(
     strategy,
     chain,
     amount,
+    badgerweth_gauge,
 ):
 
     ## deposit to the vault after approving
@@ -393,6 +407,8 @@ def test_withdraw_after_donation_6(
     # turn off health check since we just took big profit
     strategy.setDoHealthCheck(False, {"from": gov})
     chain.sleep(1)
+    token.transfer(strategy, 5 * 1e18, {"from": badgerweth_gauge})
+    strategy.setDoHealthCheck(False, {"from": gov})
     strategy.harvest({"from": gov})
     new_params = vault.strategies(strategy).dict()
 
@@ -431,6 +447,7 @@ def test_withdraw_after_donation_7(
     chain,
     amount,
     rewardsContract,
+    badgerweth_gauge,
 ):
 
     ## deposit to the vault after approving
@@ -468,6 +485,8 @@ def test_withdraw_after_donation_7(
     chain.sleep(1)
 
     # turn off health check since we just took big profit
+    strategy.setDoHealthCheck(False, {"from": gov})
+    token.transfer(strategy, 5 * 1e18, {"from": badgerweth_gauge})
     strategy.setDoHealthCheck(False, {"from": gov})
     strategy.harvest({"from": gov})
 
@@ -513,6 +532,7 @@ def test_withdraw_after_donation_8(
     chain,
     amount,
     rewardsContract,
+    badgerweth_gauge,
 ):
 
     ## deposit to the vault after approving
@@ -550,6 +570,8 @@ def test_withdraw_after_donation_8(
     chain.sleep(1)
 
     # turn off health check since we just took big profit
+    strategy.setDoHealthCheck(False, {"from": gov})
+    token.transfer(strategy, 5 * 1e18, {"from": badgerweth_gauge})
     strategy.setDoHealthCheck(False, {"from": gov})
     strategy.harvest({"from": gov})
 

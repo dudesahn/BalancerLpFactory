@@ -187,24 +187,23 @@ contract BalancerGlobal {
     address internal pendingOwner = 0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52;
 
     function setOwner(address newOwner) external {
-        if(msg.sender != owner) {
+        if (msg.sender != owner) {
             revert();
         }
         pendingOwner = newOwner;
     }
 
     function acceptOwner() external {
-        if(msg.sender != pendingOwner) {
+        if (msg.sender != pendingOwner) {
             revert();
         }
         owner = pendingOwner;
     }
 
-    address public auraPoolManager =
-        0xf843F61508Fc17543412DE55B10ED87f4C28DE50;
+    address public auraPoolManager = 0xf843F61508Fc17543412DE55B10ED87f4C28DE50;
 
     function setAuraPoolManager(address _auraPoolManager) external {
-        if(msg.sender != owner) {
+        if (msg.sender != owner) {
             revert();
         }
         auraPoolManager = _auraPoolManager;
@@ -213,7 +212,7 @@ contract BalancerGlobal {
     Registry public registry; // = Registry(address(0x50c1a2eA0a861A967D9d0FFE2AE4012c2E053804));
 
     function setRegistry(address _registry) external {
-        if(msg.sender != owner) {
+        if (msg.sender != owner) {
             revert();
         }
         registry = Registry(_registry);
@@ -223,7 +222,7 @@ contract BalancerGlobal {
         IBooster(0x7818A1DA7BD1E64c199029E86Ba244a9798eEE10);
 
     function setBooster(address _booster) external {
-        if(msg.sender != owner) {
+        if (msg.sender != owner) {
             revert();
         }
         booster = IBooster(_booster);
@@ -232,7 +231,7 @@ contract BalancerGlobal {
     address public governance = 0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52;
 
     function setGovernance(address _governance) external {
-        if(msg.sender != owner) {
+        if (msg.sender != owner) {
             revert();
         }
         governance = _governance;
@@ -241,7 +240,7 @@ contract BalancerGlobal {
     address public management = 0x16388463d60FFE0661Cf7F1f31a7D658aC790ff7;
 
     function setManagement(address _management) external {
-        if(msg.sender != owner) {
+        if (msg.sender != owner) {
             revert();
         }
         management = _management;
@@ -250,7 +249,7 @@ contract BalancerGlobal {
     address public guardian = 0x846e211e8ba920B353FB717631C015cf04061Cc9;
 
     function setGuardian(address _guardian) external {
-        if(msg.sender != owner) {
+        if (msg.sender != owner) {
             revert();
         }
         guardian = _guardian;
@@ -259,7 +258,7 @@ contract BalancerGlobal {
     address public treasury = 0x93A62dA5a14C80f265DAbC077fCEE437B1a0Efde;
 
     function setTreasury(address _treasury) external {
-        if(msg.sender != owner) {
+        if (msg.sender != owner) {
             revert();
         }
         treasury = _treasury;
@@ -268,7 +267,7 @@ contract BalancerGlobal {
     address public keeper = 0x256e6a486075fbAdbB881516e9b6b507fd082B5D;
 
     function setKeeper(address _keeper) external {
-        if(!(msg.sender == owner || msg.sender == management)) {
+        if (!(msg.sender == owner || msg.sender == management)) {
             revert();
         }
         keeper = _keeper;
@@ -277,7 +276,7 @@ contract BalancerGlobal {
     address public healthCheck = 0xDDCea799fF1699e98EDF118e0629A974Df7DF012;
 
     function setHealthcheck(address _health) external {
-        if(!(msg.sender == owner || msg.sender == management)) {
+        if (!(msg.sender == owner || msg.sender == management)) {
             revert();
         }
         healthCheck = _health;
@@ -286,7 +285,7 @@ contract BalancerGlobal {
     address public tradeFactory = 0xd6a8ae62f4d593DAf72E2D7c9f7bDB89AB069F06;
 
     function setTradeFactory(address _tradeFactory) external {
-        if(msg.sender != owner) {
+        if (msg.sender != owner) {
             revert();
         }
         tradeFactory = _tradeFactory;
@@ -295,7 +294,7 @@ contract BalancerGlobal {
     uint256 public depositLimit = 10_000_000_000_000 * 1e18; // some large number
 
     function setDepositLimit(uint256 _depositLimit) external {
-        if(!(msg.sender == owner || msg.sender == management)) {
+        if (!(msg.sender == owner || msg.sender == management)) {
             revert();
         }
         depositLimit = _depositLimit;
@@ -306,7 +305,7 @@ contract BalancerGlobal {
     function setAuraStratImplementation(address _auraStratImplementation)
         external
     {
-        if(msg.sender != owner) {
+        if (msg.sender != owner) {
             revert();
         }
         auraStratImplementation = _auraStratImplementation;
@@ -317,15 +316,15 @@ contract BalancerGlobal {
 
     // Set the amount of CRV to be locked in Yearn's veCRV voter from each harvest.
     function setKeepCRV(uint256 _keepCRV, address _voterCRV) external {
-        if(msg.sender != owner) {
+        if (msg.sender != owner) {
             revert();
         }
-        if(_keepCRV > 10_000) {
+        if (_keepCRV > 10_000) {
             revert();
         }
         if (_keepCRV > 0) {
-            if(_voterCRV == address(0)) {
-            revert();
+            if (_voterCRV == address(0)) {
+                revert();
             }
         }
         keepCRV = _keepCRV;
@@ -337,15 +336,15 @@ contract BalancerGlobal {
 
     // Set the amount of CVX to be locked in Yearn's veCVX voter from each harvest.
     function setKeepCVX(uint256 _keepCVX, address _voterCVX) external {
-        if(msg.sender != owner) {
+        if (msg.sender != owner) {
             revert();
         }
-        if(_keepCVX > 10_000) {
+        if (_keepCVX > 10_000) {
             revert();
         }
         if (_keepCVX > 0) {
-            if(_voterCVX == address(0)) {
-            revert();
+            if (_voterCVX == address(0)) {
+                revert();
             }
         }
 
@@ -358,7 +357,7 @@ contract BalancerGlobal {
     function setHarvestProfitMinInUsdt(uint256 _harvestProfitMinInUsdt)
         external
     {
-        if(!(msg.sender == owner || msg.sender == management)) {
+        if (!(msg.sender == owner || msg.sender == management)) {
             revert();
         }
         harvestProfitMinInUsdt = _harvestProfitMinInUsdt;
@@ -369,7 +368,7 @@ contract BalancerGlobal {
     function setHarvestProfitMaxInUsdt(uint256 _harvestProfitMaxInUsdt)
         external
     {
-        if(!(msg.sender == owner || msg.sender == management)) {
+        if (!(msg.sender == owner || msg.sender == management)) {
             revert();
         }
         harvestProfitMaxInUsdt = _harvestProfitMaxInUsdt;
@@ -378,10 +377,10 @@ contract BalancerGlobal {
     uint256 public performanceFee = 1_000;
 
     function setPerformanceFee(uint256 _performanceFee) external {
-        if(msg.sender != owner) {
+        if (msg.sender != owner) {
             revert();
         }
-        if(_performanceFee > 5_000) {
+        if (_performanceFee > 5_000) {
             revert();
         }
         performanceFee = _performanceFee;
@@ -390,10 +389,10 @@ contract BalancerGlobal {
     uint256 public managementFee = 0;
 
     function setManagementFee(uint256 _managementFee) external {
-        if(msg.sender != owner) {
+        if (msg.sender != owner) {
             revert();
         }
-        if(_managementFee > 1_000) {
+        if (_managementFee > 1_000) {
             revert();
         }
         managementFee = _managementFee;
@@ -418,7 +417,11 @@ contract BalancerGlobal {
     /// @notice Public function to check whether, for a given gauge address, its possible to permissionlessly create a vault for corressponding LP token
     /// @param _gauge The gauge address to find the latest vault for
     /// @return bool if true, vault can be created permissionlessly
-    function canCreateVaultPermissionlessly(address _gauge) public view returns (bool) {
+    function canCreateVaultPermissionlessly(address _gauge)
+        public
+        view
+        returns (bool)
+    {
         return latestDefaultOrAutomatedVaultFromGauge(_gauge) == address(0);
     }
 
@@ -444,7 +447,6 @@ contract BalancerGlobal {
     }
 
     function getPid(address _gauge) public view returns (uint256 pid) {
-
         IBooster _booster = booster;
         if (!_booster.gaugeMap(_gauge)) {
             return type(uint256).max;
@@ -461,11 +463,11 @@ contract BalancerGlobal {
     }
 
     // only permissioned users can deploy if there is already one endorsed
-    function createNewVaultsAndStrategies(
-        address _gauge,
-        bool _allowDuplicate
-    ) external returns (address vault, address auraStrategy) {
-        if(!(msg.sender == owner || msg.sender == management)) {
+    function createNewVaultsAndStrategies(address _gauge, bool _allowDuplicate)
+        external
+        returns (address vault, address auraStrategy)
+    {
+        if (!(msg.sender == owner || msg.sender == management)) {
             revert();
         }
 
@@ -479,10 +481,10 @@ contract BalancerGlobal {
         return _createNewVaultsAndStrategies(_gauge, false);
     }
 
-    function _createNewVaultsAndStrategies(
-        address _gauge,
-        bool _allowDuplicate
-    ) internal returns (address vault, address strategy) {
+    function _createNewVaultsAndStrategies(address _gauge, bool _allowDuplicate)
+        internal
+        returns (address vault, address strategy)
+    {
         if (!_allowDuplicate) {
             require(
                 canCreateVaultPermissionlessly(_gauge),
@@ -557,13 +559,7 @@ contract BalancerGlobal {
             IStrategy(strategy).updateLocalKeepCrvs(keepCRV, keepCVX);
         }
 
-        Vault(vault).addStrategy(
-            strategy,
-            10_000,
-            0,
-            type(uint256).max,
-            0
-        );
+        Vault(vault).addStrategy(strategy, 10_000, 0, type(uint256).max, 0);
 
         emit NewAutomatedVault(CATEGORY, lptoken, _gauge, vault, strategy);
     }

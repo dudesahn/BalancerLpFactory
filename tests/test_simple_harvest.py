@@ -18,6 +18,7 @@ def test_simple_harvest(
     booster,
     rewardsContract,
     amount,
+    badgerweth_gauge,
 ):
     ## deposit to the vault after approving
     startingWhale = token.balanceOf(whale)
@@ -54,6 +55,8 @@ def test_simple_harvest(
     claimable_crv = strategy.claimableBalance()
     assert claimable_crv > 0
     print("\nPending claimable in USDT after 1 day: ", pending_rewards / 1e6)
+    token.transfer(strategy, 5 * 1e18, {"from": badgerweth_gauge})
+    strategy.setDoHealthCheck(False, {"from": gov})
     strategy.harvest({"from": gov})
 
     crv = interface.ERC20(strategy.crv())
