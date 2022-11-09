@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0
-pragma solidity 0.6.12;
+pragma solidity ^0.8.15;
 pragma experimental ABIEncoderV2;
 
 enum VaultType {DEFAULT, AUTOMATED, FIXED_TERM, EXPERIMENTAL}
@@ -291,6 +291,15 @@ contract BalancerGlobal {
         tradeFactory = _tradeFactory;
     }
 
+    address public baseFeeOracle = 0x1E7eFAbF282614Aa2543EDaA50517ef5a23c868b;
+
+    function setBaseFeeOracle(address _baseFeeOracle) external {
+        if (msg.sender != owner) {
+            revert();
+        }
+        baseFeeOracle = _baseFeeOracle;
+    }
+
     uint256 public depositLimit = 10_000_000_000_000 * 1e18; // some large number
 
     function setDepositLimit(uint256 _depositLimit) external {
@@ -314,7 +323,7 @@ contract BalancerGlobal {
     uint256 public keepCRV = 0; // the percentage of CRV we re-lock for boost (in basis points).Default is 0%.
     address public voterCRV;
 
-    // Set the amount of CRV to be locked in Yearn's veCRV voter from each harvest.
+    // Set the amount of BAL to be locked in Yearn's veBAL voter from each harvest.
     function setKeepCRV(uint256 _keepCRV, address _voterCRV) external {
         if (msg.sender != owner) {
             revert();
@@ -352,7 +361,7 @@ contract BalancerGlobal {
         voterCVX = _voterCVX;
     }
 
-    uint256 public harvestProfitMinInUsdt = 10_000 * 1e6; // what profit do we need to harvest
+    uint256 public harvestProfitMinInUsdt = 7_500 * 1e6; // what profit do we need to allow a harvest
 
     function setHarvestProfitMinInUsdt(uint256 _harvestProfitMinInUsdt)
         external
@@ -363,7 +372,7 @@ contract BalancerGlobal {
         harvestProfitMinInUsdt = _harvestProfitMinInUsdt;
     }
 
-    uint256 public harvestProfitMaxInUsdt = 25_000 * 1e6; // what profit do we need to harvest
+    uint256 public harvestProfitMaxInUsdt = 100_000 * 1e6; // what profit do we need to force a harvest
 
     function setHarvestProfitMaxInUsdt(uint256 _harvestProfitMaxInUsdt)
         external
@@ -519,7 +528,10 @@ contract BalancerGlobal {
                 )
             ),
             string(
-                abi.encodePacked("yvBPT-", IDetails(address(lptoken)).symbol())
+                abi.encodePacked(
+                    "yvBalancer-",
+                    IDetails(address(lptoken)).symbol()
+                )
             ),
             0,
             VaultType.AUTOMATED
