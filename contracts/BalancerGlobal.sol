@@ -180,7 +180,7 @@ contract BalancerGlobal {
     }
 
     address public constant AURA = 0xC0c293ce456fF0ED870ADd98a0828Dd4d2903DBF;
-    uint256 public constant CATEGORY = 1; // 1 for balancer
+    uint256 public constant CATEGORY = 1; // 1 for balancer, ******NEED TO RECONCILE THIS WITH DEFAULT VAULT TYPES ON REGISTRY
 
     // always owned by ychad
     address public owner;

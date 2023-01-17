@@ -3,7 +3,6 @@ pragma solidity ^0.8.15;
 
 // These are the core Yearn libraries
 import "@openzeppelin/contracts/utils/math/Math.sol";
-
 import "./interfaces/curve.sol";
 import "@yearnvaults/contracts/BaseStrategy.sol";
 
@@ -372,9 +371,6 @@ contract StrategyConvexFactoryClonable is BaseStrategy {
                 _loss = debt - assets;
             }
         }
-
-        // we're done harvesting, so reset our trigger if we used it
-        forceHarvestTriggerOnce = false;
     }
 
     // migrate our want token to a new strategy if needed
@@ -454,7 +450,8 @@ contract StrategyConvexFactoryClonable is BaseStrategy {
         return false;
     }
 
-    /// @notice The value in dollars that our claimable rewards are worth (in USDC, 6 decimals).
+    /// @notice Calculates the profit if all claimable assets were sold for USDC (6 decimals).
+    /// @return Total return in USDC from selling claimable CRV and CVX.
     function claimableProfitInUsdc() public view returns (uint256) {
         IOracle yearnOracle =
             IOracle(0x83d95e0D5f402511dB06817Aff3f9eA88224B030); // yearn lens oracle
@@ -502,10 +499,7 @@ contract StrategyConvexFactoryClonable is BaseStrategy {
 
         // Oracle returns prices as 6 decimals, so multiply by claimable amount and divide by token decimals (1e18)
         return
-            uint256(
-                (crvPrice * _claimableBal + convexTokenPrice * mintableCvx) /
-                    1e18
-            );
+            (crvPrice * _claimableBal + convexTokenPrice * mintableCvx) / 1e18;
     }
 
     // convert our keeper's eth cost into want, we don't need this anymore since we don't use baseStrategy harvestTrigger

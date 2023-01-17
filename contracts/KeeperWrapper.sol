@@ -6,6 +6,7 @@ interface IStrategy {
 }
 
 contract KeeperWrapper {
+    /// @notice This allows anyone to call harvest() on vaults created by the factory.
     function harvestStrategy(address _strategy) external {
         IStrategy(_strategy).harvest();
     }
